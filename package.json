@@ -1,0 +1,26 @@
+{
+  "name": "nodejs-social-app-backend",
+  "version": "1.0.0",
+  "description": "node backend based on express",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muzammil123hussain/NODEJS-Socail-App-Backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/muzammil123hussain/NODEJS-Socail-App-Backend/issues"
+  },
+  "homepage": "https://github.com/muzammil123hussain/NODEJS-Socail-App-Backend#readme",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
