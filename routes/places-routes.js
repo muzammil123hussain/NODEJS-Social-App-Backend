@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const HttpError = require("../models/http-error");
 
 const router = express.Router();
 
@@ -41,9 +42,7 @@ router.get("/:placeID", (req, res, next) => {
   });
 
   if (!place) {
-    const error = new Error("No place found with this place id");
-    error.code = 404;
-    throw error;
+    throw (error = new HttpError("No place found with this place id", 404));
   }
   res.json({
     place,
@@ -51,15 +50,14 @@ router.get("/:placeID", (req, res, next) => {
 });
 
 router.get("/user/:userID", (req, res, next) => {
-  console.log("In");
   const userID = req.params.userID;
   const place = PLACES.find((p) => {
     return p.creator === userID;
   });
   if (!place) {
-    const error = new Error("No place found for this user id");
-    error.code = 404;
-    return next(error);
+    return next(
+      (error = new HttpError("No place found for this user id", 404))
+    );
   }
   res.json({
     place,
