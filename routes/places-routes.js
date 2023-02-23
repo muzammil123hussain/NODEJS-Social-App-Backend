@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const {
   getPlaceById,
-  getPlaceByUserId,
+  getPlacesByUserId,
   createPlace,
   updatePlace,
   deletePlace,
@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.get("/:placeID", getPlaceById);
 
-router.get("/user/:userID", getPlaceByUserId);
+router.get("/user/:userID", getPlacesByUserId);
 
 router.post("/", createPlace);
 
