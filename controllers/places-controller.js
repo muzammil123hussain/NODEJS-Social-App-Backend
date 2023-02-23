@@ -3,8 +3,6 @@ const HttpError = require("../models/http-error");
 const PLACES = [
   {
     id: "p1",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/d/d4/View_of_Makli_by_Usman_Ghani_%28cropped%29.jpg",
     title: "Makli Necropolis",
     description:
       "Makli Necropolis is one of the largest funerary sites in the world, spread over an area of 10 kilometres near the city of Thatta, in the Pakistani province of Sindh. The site houses approximately 500,000 to 1 million tombs built over the course of a 400-year period.",
@@ -17,8 +15,6 @@ const PLACES = [
   },
   {
     id: "p2",
-    image:
-      "https://stdc.gos.pk/media/com_solidres/assets/images/system/keenjharlake03.jpg",
     title: "KARLI",
     description:
       "Keenjhar Lake commonly called Malik Lake is located in Thatta District of Sindh the province of Pakistan. It is situated about 36 kilometres from the city of Thatta. It is the largest fresh water lake in Pakistan and an important source of drinking water for Thatta District and Karachi city.",
@@ -60,5 +56,21 @@ const getPlaceByUserId = (req, res, next) => {
   });
 };
 
+const createPlace = (req, res, next) => {
+  const { title, description, address, coordinates, creator } = req.body;
+
+  const createdPlace = {
+    title,
+    description,
+    address,
+    location: coordinates,
+    creator,
+  };
+
+  PLACES.push(createdPlace);
+  res.status(201).json({ place: createdPlace });
+};
+
 exports.getPlaceById = getPlaceById;
 exports.getPlaceByUserId = getPlaceByUserId;
+exports.createPlace = createPlace;
