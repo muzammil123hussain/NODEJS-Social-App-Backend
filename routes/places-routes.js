@@ -41,7 +41,9 @@ router.get("/:placeID", (req, res, next) => {
   });
 
   if (!place) {
-    return res.status(404).json({ message: "No Place found" });
+    const error = new Error("No place found with this place id");
+    error.code = 404;
+    throw error;
   }
   res.json({
     place,
@@ -55,7 +57,9 @@ router.get("/user/:userID", (req, res, next) => {
     return p.creator === userID;
   });
   if (!place) {
-    return res.status(404).json({ message: "No Place found for this user" });
+    const error = new Error("No place found for this user id");
+    error.code = 404;
+    return next(error);
   }
   res.json({
     place,
