@@ -40,19 +40,23 @@ router.get("/:placeID", (req, res, next) => {
     return p.id === placeID;
   });
 
+  if (!place) {
+    return res.status(404).json({ message: "No Place found" });
+  }
   res.json({
     place,
   });
-  next();
 });
 
 router.get("/user/:userID", (req, res, next) => {
-    console.log("In")
+  console.log("In");
   const userID = req.params.userID;
   const place = PLACES.find((p) => {
     return p.creator === userID;
   });
-
+  if (!place) {
+    return res.status(404).json({ message: "No Place found for this user" });
+  }
   res.json({
     place,
   });
