@@ -25,7 +25,14 @@ router.post(
   createPlace
 );
 
-router.patch("/:placeID", updatePlace);
+router.patch(
+  "/:placeID",
+  [
+    check("title").notEmpty(),
+    check("description").isLength({ min: 5 })
+  ],
+  updatePlace
+);
 
 router.delete("/:placeID", deletePlace);
 

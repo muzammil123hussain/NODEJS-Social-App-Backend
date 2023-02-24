@@ -79,6 +79,11 @@ const createPlace = (req, res, next) => {
 };
 
 const updatePlace = (req, res, next) => {
+  const error = validationResult(req);
+
+  if (!error.isEmpty()) {
+    throw new HttpError("Invalid input", 422);
+  }
   const { title, description } = req.body;
   const placeId = req.params.placeID;
 
@@ -94,6 +99,10 @@ const updatePlace = (req, res, next) => {
 
 const deletePlace = (req, res, next) => {
   const placeId = req.params.placeID;
+  const place = PLACES.find((p) => p.id === placeId);
+  if (!place) {
+    throw new HttpError("Placce not found with this error", 404);
+  }
   PLACES = PLACES.filter((p) => p.id !== placeId);
   res.status(200).json({ message: "Place deleted" });
 };
