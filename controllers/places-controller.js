@@ -35,7 +35,7 @@ const getPlaceById = (req, res, next) => {
   });
 
   if (!place) {
-    throw (error = new HttpError("No place found with this place id", 404));
+    throw new HttpError("No place found with this place id", 404);
   }
   res.json({
     place,
@@ -48,9 +48,7 @@ const getPlacesByUserId = (req, res, next) => {
     return p.creator === userID;
   });
   if (!places || places.length === 0) {
-    return next(
-      (error = new HttpError("No place found for this user id", 404))
-    );
+    return next(new HttpError("No place found for this user id", 404));
   }
   res.json({
     places,
