@@ -12,8 +12,21 @@ const USERS = [
   },
 ];
 
-const getUsers = (req, res, next) => {
-  res.status(200).json({ USERS });
+const getUsers = async (req, res, next) => {
+  let users;
+  try {
+    users = await UserModel.find({}, "-password");
+  } catch (err) {
+    return next(new HttpError("Something went wrong", 500));
+  }
+
+  if (!users) {
+    return next(new HttpError("No user found", 404));
+  }
+
+  res
+    .status(200)
+    .json({ users: users.map((user) => user.toObject({ getters: true })) });
 };
 
 const signup = async (req, res, next) => {
@@ -34,7 +47,7 @@ const signup = async (req, res, next) => {
     password,
     image:
       "https://upload.wikimedia.org/wikipedia/commons/d/d4/View_of_Makli_by_Usman_Ghani_%28cropped%29.jpg",
-    places: 'p1'
+    places: "p1",
   });
 
   try {
@@ -46,14 +59,21 @@ const signup = async (req, res, next) => {
   res.status(201).json({ user: createdUser.toObject({ getters: true }) });
 };
 
-const login = (req, res, next) => {
+const login = async (req, res, next) => {
   const { email, password } = req.body;
-
-  const user = USERS.find((u) => u.email === email);
-  if (!user || user.password !== password) {
-    throw new HttpError("Could not find user, seems to be creds wrong", 401);
+  let user;
+  try {
+    user = await UserModel.findOne({ email: email });
+  } catch (err) {
+    return next(new HttpError("something went wrong", 422));
   }
-  res.json({ message: "Logged In" });
+  if (!user) {
+    return next(new HttpError("Cannot find user with this email", 404));
+  }
+  if (user.password !== password) {
+    return next(new HttpError("Invalid creds", 401));
+  }
+  res.status(200).json({ message: "Logged In" });
 };
 
 exports.getUsers = getUsers;
