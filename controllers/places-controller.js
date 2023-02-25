@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator");
 const { v4 } = require("uuid");
 const HttpError = require("../models/http-error");
+const PlaceModel = require("../models/place");
 
 let PLACES = [
   {
@@ -48,7 +49,7 @@ const getPlacesByUserId = (req, res, next) => {
   });
 };
 
-const createPlace = (req, res, next) => {
+const createPlace = async (req, res, next) => {
   const error = validationResult(req);
 
   if (!error.isEmpty()) {
@@ -57,15 +58,19 @@ const createPlace = (req, res, next) => {
 
   const { title, description, address, creator } = req.body;
 
-  const createdPlace = {
-    id: v4(),
+  const createdPlace = new PlaceModel({
     title,
     description,
     address,
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/d/d4/View_of_Makli_by_Usman_Ghani_%28cropped%29.jpg",
     creator,
-  };
-
-  PLACES.push(createdPlace);
+  });
+  try {
+    await createdPlace.save();
+  } catch {
+    return next(new HttpError("Place is not created, Try Again!"));
+  }
   res.status(201).json({ place: createdPlace });
 };
 
