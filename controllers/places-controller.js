@@ -1,28 +1,9 @@
 const { validationResult } = require("express-validator");
-const { v4 } = require("uuid");
 const HttpError = require("../models/http-error");
 const PlaceModel = require("../models/place");
 const UserModel = require("../models/user");
 const mongoose = require("mongoose");
 
-let PLACES = [
-  {
-    id: "p1",
-    title: "Makli Necropolis",
-    description:
-      "Makli Necropolis is one of the largest funerary sites in the world, spread over an area of 10 kilometres near the city of Thatta, in the Pakistani province of Sindh. The site houses approximately 500,000 to 1 million tombs built over the course of a 400-year period.",
-    address: "Makli, Thatta, Sindh",
-    creator: "u1",
-  },
-  {
-    id: "p2",
-    title: "KARLI",
-    description:
-      "Keenjhar Lake commonly called Malik Lake is located in Thatta District of Sindh the province of Pakistan. It is situated about 36 kilometres from the city of Thatta. It is the largest fresh water lake in Pakistan and an important source of drinking water for Thatta District and Karachi city.",
-    address: "Thatta, Sindh",
-    creator: "u2",
-  },
-];
 
 const getPlaceById = async (req, res, next) => {
   const placeID = req.params.placeID;
