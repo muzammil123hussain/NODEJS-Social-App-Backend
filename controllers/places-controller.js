@@ -34,7 +34,7 @@ const getPlaceById = async (req, res, next) => {
   if (!place) {
     return next(new HttpError("No place found with this place id", 404));
   }
-  res.json({ place: place.toObject({ getters: true }) });
+  res.status(200).json({ place: place.toObject({ getters: true }) });
 };
 
 const getPlacesByUserId = async (req, res, next) => {
@@ -50,7 +50,7 @@ const getPlacesByUserId = async (req, res, next) => {
   if (!places || places.length === 0) {
     return next(new HttpError("No place found for this user id", 404));
   }
-  res.json({
+  res.status(200).json({
     places: places.map((place) => place.toObject({ getters: true })),
   });
 };

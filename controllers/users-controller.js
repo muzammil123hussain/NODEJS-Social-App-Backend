@@ -1,6 +1,7 @@
 const { uuid } = require("uuidv4");
 const { validationResult } = require("express-validator");
 const HttpError = require("../models/http-error");
+const UserModel = require("../models/user");
 
 const USERS = [
   {
@@ -15,30 +16,34 @@ const getUsers = (req, res, next) => {
   res.status(200).json({ USERS });
 };
 
-const signup = (req, res, next) => {
+const signup = async (req, res, next) => {
   const error = validationResult(req);
 
   if (!error.isEmpty()) {
-    throw new HttpError("Invalid input", 422);
+    return next(new HttpError("Invalid input", 422));
   }
 
   const { name, email, password } = req.body;
-
-  const hasUser = USERS.find((u) => u.email === email);
-
+  const hasUser = await UserModel.findOne({ email: email });
   if (hasUser) {
-    throw new HttpError("User Already Exist", 422);
+    return next(new HttpError("User Already Exist", 422));
   }
-
-  const createdUser = {
-    id: uuid(),
+  const createdUser = new UserModel({
     name,
     email,
     password,
-  };
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/d/d4/View_of_Makli_by_Usman_Ghani_%28cropped%29.jpg",
+    places: 'p1'
+  });
 
-  USERS.push(createdUser);
-  res.status(201).json({ user: createdUser });
+  try {
+    await createdUser.save();
+  } catch (err) {
+    return next(new HttpError("User is not created", 500));
+  }
+
+  res.status(201).json({ user: createdUser.toObject({ getters: true }) });
 };
 
 const login = (req, res, next) => {
