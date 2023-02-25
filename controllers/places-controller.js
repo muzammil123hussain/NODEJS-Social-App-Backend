@@ -2,6 +2,8 @@ const { validationResult } = require("express-validator");
 const { v4 } = require("uuid");
 const HttpError = require("../models/http-error");
 const PlaceModel = require("../models/place");
+const UserModel = require("../models/user");
+const mongoose = require("mongoose");
 
 let PLACES = [
   {
@@ -72,10 +74,27 @@ const createPlace = async (req, res, next) => {
       "https://upload.wikimedia.org/wikipedia/commons/d/d4/View_of_Makli_by_Usman_Ghani_%28cropped%29.jpg",
     creator,
   });
+
+  let user;
   try {
-    await createdPlace.save();
+    user = await UserModel.findById(creator);
   } catch (err) {
-    return next(new HttpError("Place is not created", 500));
+    return next(new HttpError("Something went wrong in finding user", 500));
+  }
+
+  if (!user) {
+    return next(new HttpError("No user found with this ID", 404));
+  }
+
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await createdPlace.save({ session: sess });
+    user.places.push(createdPlace);
+    await user.save({ session: sess });
+    await sess.commitTransaction();
+  } catch (err) {
+    return next(new HttpError("Creating place failed, please try again", 500));
   }
   res.status(201).json({ place: createdPlace });
 };
@@ -136,7 +155,7 @@ const deletePlace = async (req, res, next) => {
     return next(new HttpError("Place not found with this id", 404));
   }
   try {
-    place.remove()
+    place.remove();
   } catch (err) {
     return next(new HttpError("something went wrong in DB server", 500));
   }

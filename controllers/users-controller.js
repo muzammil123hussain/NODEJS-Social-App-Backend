@@ -47,7 +47,7 @@ const signup = async (req, res, next) => {
     password,
     image:
       "https://upload.wikimedia.org/wikipedia/commons/d/d4/View_of_Makli_by_Usman_Ghani_%28cropped%29.jpg",
-    places: "p1",
+    places: [],
   });
 
   try {
