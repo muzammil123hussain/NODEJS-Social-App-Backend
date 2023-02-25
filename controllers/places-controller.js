@@ -53,7 +53,7 @@ const createPlace = async (req, res, next) => {
   const error = validationResult(req);
 
   if (!error.isEmpty()) {
-    throw new HttpError("Invalid input", 422);
+    return next(new HttpError("Invalid input", 422));
   }
 
   const { title, description, address, creator } = req.body;
@@ -68,8 +68,8 @@ const createPlace = async (req, res, next) => {
   });
   try {
     await createdPlace.save();
-  } catch {
-    return next(new HttpError("Place is not created, Try Again!"));
+  } catch (err) {
+    return next(new HttpError("Place is not created", 500));
   }
   res.status(201).json({ place: createdPlace });
 };
