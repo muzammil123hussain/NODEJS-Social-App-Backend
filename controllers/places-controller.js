@@ -22,18 +22,19 @@ let PLACES = [
   },
 ];
 
-const getPlaceById = (req, res, next) => {
+const getPlaceById = async (req, res, next) => {
   const placeID = req.params.placeID;
-  const place = PLACES.find((p) => {
-    return p.id === placeID;
-  });
+  let place;
+  try {
+    place = await PlaceModel.findById(placeID);
+  } catch (err) {
+    return next(new HttpError("something went wrong in DB server", 500));
+  }
 
   if (!place) {
-    throw new HttpError("No place found with this place id", 404);
+    return next(new HttpError("No place found with this place id", 404));
   }
-  res.json({
-    place,
-  });
+  res.json({ place: place.toObject({ getters: true }) });
 };
 
 const getPlacesByUserId = (req, res, next) => {
