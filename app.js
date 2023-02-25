@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const creds = require("./dbCreds");
 
 const placesRoutes = require("./routes/places-routes");
 const userRoutes = require("./routes/users-routes");
@@ -27,6 +28,12 @@ app.use((error, req, res, next) => {
 });
 
 mongoose
-  .connect("mongodb+srv://muzammilhussain:Bgnwe2sgasAoxdws@cluster0.4gfliar.mongodb.net/?retryWrites=true&w=majority")
+  .connect(
+    "mongodb+srv://" +
+      creds.userName +
+      ":" +
+      creds.password +
+      "@cluster0.4gfliar.mongodb.net/?retryWrites=true&w=majority"
+  )
   .then(() => app.listen(5000))
   .catch();
