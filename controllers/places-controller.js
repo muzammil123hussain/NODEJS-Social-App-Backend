@@ -80,32 +80,67 @@ const createPlace = async (req, res, next) => {
   res.status(201).json({ place: createdPlace });
 };
 
-const updatePlace = (req, res, next) => {
+const updatePlace = async (req, res, next) => {
   const error = validationResult(req);
 
   if (!error.isEmpty()) {
-    throw new HttpError("Invalid input", 422);
+    return next(new HttpError("Invalid input", 422));
   }
+
   const { title, description } = req.body;
   const placeId = req.params.placeID;
 
-  const updatedPlace = { ...PLACES.find((p) => p.id === placeId) };
-  const placeIndex = PLACES.findIndex((p) => p.id === placeId);
-  updatedPlace.title = title;
-  updatedPlace.description = description;
+  let place;
+  try {
+    place = await PlaceModel.findById(placeId);
+  } catch (err) {
+    return next(
+      new HttpError(
+        "something went wrong in DB server, could not update place",
+        500
+      )
+    );
+  }
 
-  PLACES[placeIndex] = updatedPlace;
+  if (!place) {
+    return next(new HttpError("No place found with this place id", 404));
+  }
 
-  res.status(200).json({ place: updatedPlace });
+  (place.title = title), (place.description = description);
+
+  try {
+    await place.save();
+  } catch (err) {
+    return next(new HttpError("Place is not Updated", 500));
+  }
+  res.status(200).json({ place: place.toObject({ getters: true }) });
 };
 
-const deletePlace = (req, res, next) => {
+const deletePlace = async (req, res, next) => {
   const placeId = req.params.placeID;
-  const place = PLACES.find((p) => p.id === placeId);
-  if (!place) {
-    throw new HttpError("Placce not found with this error", 404);
+
+  let place;
+
+  try {
+    place = await PlaceModel.findById(placeId);
+  } catch (err) {
+    return next(
+      new HttpError(
+        "something went wrong in DB server, could not delete place",
+        500
+      )
+    );
   }
-  PLACES = PLACES.filter((p) => p.id !== placeId);
+
+  if (!place) {
+    return next(new HttpError("Place not found with this id", 404));
+  }
+  try {
+    place.remove()
+  } catch (err) {
+    return next(new HttpError("something went wrong in DB server", 500));
+  }
+
   res.status(200).json({ message: "Place deleted" });
 };
 
