@@ -37,16 +37,21 @@ const getPlaceById = async (req, res, next) => {
   res.json({ place: place.toObject({ getters: true }) });
 };
 
-const getPlacesByUserId = (req, res, next) => {
+const getPlacesByUserId = async (req, res, next) => {
   const userID = req.params.userID;
-  const places = PLACES.filter((p) => {
-    return p.creator === userID;
-  });
+
+  let places;
+  try {
+    places = await PlaceModel.find({ creator: userID });
+  } catch (err) {
+    return next(new HttpError("something went wrong in DB server", 500));
+  }
+
   if (!places || places.length === 0) {
     return next(new HttpError("No place found for this user id", 404));
   }
   res.json({
-    places,
+    places: places.map((place) => place.toObject({ getters: true })),
   });
 };
 
