@@ -2,6 +2,7 @@ const { validationResult } = require("express-validator");
 const HttpError = require("../models/http-error");
 const UserModel = require("../models/user");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const getUsers = async (req, res, next) => {
   let users;
@@ -54,7 +55,19 @@ const signup = async (req, res, next) => {
     return next(new HttpError("User is not created", 500));
   }
 
-  res.status(201).json({ user: createdUser.toObject({ getters: true }) });
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: createdUser.id, email: createdUser.email },
+      "secretTokenJWT",
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    return next(new HttpError("User is not created", 500));
+  }
+  res
+    .status(201)
+    .json({ userId: createdUser.id, email: createdUser.email, token: token });
 };
 
 const login = async (req, res, next) => {
@@ -80,9 +93,23 @@ const login = async (req, res, next) => {
   if (!isValidCreds) {
     return next(new HttpError("Invalid creds", 401));
   }
+
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: user.id, email: user.email },
+      "secretTokenJWT",
+      { expiresIn: "1h" }
+      );
+  } catch (err) {
+    return next(new HttpError("Log in Error ", 500));
+  }
+
   res.status(200).json({
     message: "Logged In",
-    user: user.toObject({ getters: true }),
+    userId: user.id,
+    email: user.email,
+    token: token,
   });
 };
 
