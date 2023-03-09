@@ -23,6 +23,7 @@ const signup = async (req, res, next) => {
   const error = validationResult(req);
 
   if (!error.isEmpty()) {
+
     return next(new HttpError("Invalid input", 422));
   }
 
@@ -35,8 +36,7 @@ const signup = async (req, res, next) => {
     name,
     email,
     password,
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/d/d4/View_of_Makli_by_Usman_Ghani_%28cropped%29.jpg",
+    image: req.file.path,
     places: [],
   });
 
