@@ -8,6 +8,8 @@ const {
   deletePlace,
 } = require("../controllers/places-controller");
 const { check } = require("express-validator");
+const fileUpload = require("../middleware/file-upload");
+
 
 const router = express.Router();
 
@@ -17,6 +19,7 @@ router.get("/user/:userID", getPlacesByUserId);
 
 router.post(
   "/",
+  fileUpload.single("image"),
   [
     check("title").notEmpty(),
     check("description").isLength({ min: 5 }),
@@ -27,10 +30,7 @@ router.post(
 
 router.patch(
   "/:placeID",
-  [
-    check("title").notEmpty(),
-    check("description").isLength({ min: 5 })
-  ],
+  [check("title").notEmpty(), check("description").isLength({ min: 5 })],
   updatePlace
 );
 

@@ -3,7 +3,7 @@ const HttpError = require("../models/http-error");
 const PlaceModel = require("../models/place");
 const UserModel = require("../models/user");
 const mongoose = require("mongoose");
-
+const fs = require("fs");
 
 const getPlaceById = async (req, res, next) => {
   const placeID = req.params.placeID;
@@ -51,8 +51,7 @@ const createPlace = async (req, res, next) => {
     title,
     description,
     address,
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/d/d4/View_of_Makli_by_Usman_Ghani_%28cropped%29.jpg",
+    image: req.file.path,
     creator,
   });
 
@@ -135,6 +134,8 @@ const deletePlace = async (req, res, next) => {
   if (!place) {
     return next(new HttpError("Place not found with this id", 404));
   }
+  const imagePath = place.image;
+
   try {
     const sess = await mongoose.startSession();
     sess.startTransaction();
@@ -145,6 +146,10 @@ const deletePlace = async (req, res, next) => {
   } catch (err) {
     return next(new HttpError("something went wrong in DB server", 500));
   }
+
+  fs.unlink(imagePath, (err) => {
+    console.log(err);
+  });
 
   res.status(200).json({ message: "Place deleted" });
 };
