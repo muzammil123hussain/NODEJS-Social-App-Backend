@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator");
 const HttpError = require("../models/http-error");
 const UserModel = require("../models/user");
+const bcrypt = require("bcryptjs");
 
 const getUsers = async (req, res, next) => {
   let users;
@@ -23,7 +24,6 @@ const signup = async (req, res, next) => {
   const error = validationResult(req);
 
   if (!error.isEmpty()) {
-
     return next(new HttpError("Invalid input", 422));
   }
 
@@ -32,10 +32,18 @@ const signup = async (req, res, next) => {
   if (hasUser) {
     return next(new HttpError("User Already Exist", 422));
   }
+
+  let hashedPassword;
+
+  try {
+    hashedPassword = await bcrypt.hash(password, 12);
+  } catch (err) {
+    return next(new HttpError("Cannot create user, Try again", 500));
+  }
   const createdUser = new UserModel({
     name,
     email,
-    password,
+    password: hashedPassword,
     image: req.file.path,
     places: [],
   });
@@ -60,15 +68,22 @@ const login = async (req, res, next) => {
   if (!user) {
     return next(new HttpError("Cannot find user with this email", 404));
   }
-  if (user.password !== password) {
+
+  let isValidCreds = false;
+
+  try {
+    isValidCreds = await bcrypt.compare(password, user.password);
+  } catch (err) {
+    return next(new HttpError("Error in Log In, Try again", 500));
+  }
+
+  if (!isValidCreds) {
     return next(new HttpError("Invalid creds", 401));
   }
-  res
-    .status(200)
-    .json({
-      message: "Logged In",
-      user: user.toObject({ getters: true }),
-    });
+  res.status(200).json({
+    message: "Logged In",
+    user: user.toObject({ getters: true }),
+  });
 };
 
 exports.getUsers = getUsers;
