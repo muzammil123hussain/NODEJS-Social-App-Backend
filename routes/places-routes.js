@@ -9,13 +9,15 @@ const {
 } = require("../controllers/places-controller");
 const { check } = require("express-validator");
 const fileUpload = require("../middleware/file-upload");
-
+const checkAuth = require("../middleware/check-auth");
 
 const router = express.Router();
 
 router.get("/:placeID", getPlaceById);
 
 router.get("/user/:userID", getPlacesByUserId);
+
+router.use(checkAuth);
 
 router.post(
   "/",
