@@ -54,19 +54,19 @@ const createPlace = async (req, res, next) => {
     return next(new HttpError("Invalid input", 422));
   }
 
-  const { title, description, address, creator } = req.body;
+  const { title, description, address } = req.body;
 
   const createdPlace = new PlaceModel({
     title,
     description,
     address,
     image: req.file.path,
-    creator,
+    creator: req.userData.userId,
   });
 
   let user;
   try {
-    user = await UserModel.findById(creator);
+    user = await UserModel.findById(req.userData.userId);
   } catch (err) {
     return next(new HttpError("Something went wrong in finding user", 500));
   }
