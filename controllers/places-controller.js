@@ -21,20 +21,31 @@ const getPlaceById = async (req, res, next) => {
 };
 
 const getPlacesByUserId = async (req, res, next) => {
-  const userID = req.params.userID;
+  const userId = req.params.uid;
 
-  let places;
+  // let places;
+  let userWithPlaces;
   try {
-    places = await PlaceModel.find({ creator: userID });
+    userWithPlaces = await UserModel.findById(userId).populate("places");
   } catch (err) {
-    return next(new HttpError("something went wrong in DB server", 500));
+    const error = new HttpError(
+      "Fetching places failed, please try again later.",
+      500
+    );
+    return next(error);
   }
 
-  if (!places || places.length === 0) {
-    return next(new HttpError("No place found for this user id", 404));
+  // if (!places || places.length === 0) {
+  if (!userWithPlaces || userWithPlaces.places.length === 0) {
+    return next(
+      new HttpError("Could not find places for the provided user id.", 404)
+    );
   }
-  res.status(200).json({
-    places: places.map((place) => place.toObject({ getters: true })),
+
+  res.json({
+    places: userWithPlaces.places.map((place) =>
+      place.toObject({ getters: true })
+    ),
   });
 };
 
@@ -90,6 +101,7 @@ const updatePlace = async (req, res, next) => {
   const placeId = req.params.placeID;
 
   let place;
+
   try {
     place = await PlaceModel.findById(placeId);
   } catch (err) {
@@ -103,6 +115,10 @@ const updatePlace = async (req, res, next) => {
 
   if (!place) {
     return next(new HttpError("No place found with this place id", 404));
+  }
+
+  if (place.creator.toString() !== req.userData.userId) {
+    return next(new HttpError("you are not allowed to update place", 401));
   }
 
   (place.title = title), (place.description = description);
@@ -134,6 +150,11 @@ const deletePlace = async (req, res, next) => {
   if (!place) {
     return next(new HttpError("Place not found with this id", 404));
   }
+
+  if (place.creator.id.toString() !== req.userData.userId) {
+    return next(new HttpError("you are not allowed to delete place", 401));
+  }
+
   const imagePath = place.image;
 
   try {
